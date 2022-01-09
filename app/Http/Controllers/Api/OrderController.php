@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\HmoMail;
 use App\Models\Hmo;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -19,10 +21,10 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            // Validate input data
-            $request->validate(Order::$rules);
+        // Validate input data
+        $request->validate(Order::$rules);
 
+        try {
             // Get the hmo
             $hmo = Hmo::where('code', $request->provider_data['hmo_code'])->firstOrFail();
 
@@ -36,7 +38,14 @@ class OrderController extends Controller
             // Save new order
             $hmo->orders()->save($order);
 
-            return response()->json(['success' => true, 'message' => 'Order created successfully!', 'data' => $request->all()]);
+            // Send email to HMO
+            try {
+                $this->sendMail($hmo->email, ['hmo_name' => $hmo->name, 'batch_name' => $order->batch_name, 'provider_name' => $request->provider_data['provider_name']]);
+            } catch (\Throwable $th) {
+                logger($th);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Order created successfully!']);
         } catch (\Throwable $th) {
             // Log error to console
             logger($th);
@@ -65,5 +74,18 @@ class OrderController extends Controller
             $batchName = $provider['provider_name'] . " " . $currentDate->format('M') . " " . $currentDate->format('Y');
         }
         return $batchName;
+    }
+
+    /**
+     * Send email to respective HMOs
+     *
+     * @param string $hmoEmail
+     * @param array $emailData
+     *
+     * @return void
+     */
+    public function sendMail($hmoEmail, $emailData)
+    {
+        Mail::to($hmoEmail)->send(new HmoMail($emailData));
     }
 }

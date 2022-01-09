@@ -6,6 +6,20 @@
                     <div class="card-header">Submit An Order</div>
 
                     <div class="card-body">
+                        <div
+                            v-if="notify.success"
+                            class="alert alert-success"
+                            role="alert"
+                        >
+                            {{ notify.successMessage }}
+                        </div>
+                        <div
+                            v-if="notify.error"
+                            class="alert alert-danger"
+                            role="alert"
+                        >
+                            {{ notify.errorMessage }}
+                        </div>
                         <div>
                             <div class="form-row align-items-center mb-4">
                                 <div class="col-auto">
@@ -64,7 +78,7 @@
                                             >Unit Price</label
                                         >
                                         <input
-                                            type="text"
+                                            type="number"
                                             class="form-control mb-2"
                                             placeholder="Unit Price"
                                             v-model="formData[key].unit_price"
@@ -97,7 +111,7 @@
                                         />
                                     </div>
 
-                                    <div class="col-1">
+                                    <div v-if="key != 0" class="col-1">
                                         <button
                                             type="button"
                                             class="btn btn-primary mb-2 btn-sm"
@@ -165,7 +179,13 @@ export default {
                 provider_name: "",
                 date: ""
             },
-            total: 0
+            total: 0,
+            notify: {
+                error: false,
+                errorMessage: "",
+                success: false,
+                successMessage: ""
+            }
         };
     },
     methods: {
@@ -195,10 +215,14 @@ export default {
                     provider_data: this.providerData
                 })
                 .then(response => {
-                    console.log(response);
+                    // Handle notification
+                    this.notify.success = true;
+                    this.notify.successMessage = response.data.message;
                 })
                 .catch(error => {
-                    console.error(error);
+                    // Handle notification
+                    this.notify.error = true;
+                    this.notify.errorMessage = error.response.data.message;
                 });
         }
     },

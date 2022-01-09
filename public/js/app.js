@@ -2447,6 +2447,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2462,7 +2476,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         provider_name: "",
         date: ""
       },
-      total: 0
+      total: 0,
+      notify: {
+        error: false,
+        errorMessage: "",
+        success: false,
+        successMessage: ""
+      }
     };
   },
   methods: {
@@ -2497,9 +2517,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                   total: _this.total,
                   provider_data: _this.providerData
                 }).then(function (response) {
-                  console.log(response);
+                  // Handle notification
+                  _this.notify.success = true;
+                  _this.notify.successMessage = response.data.message;
                 })["catch"](function (error) {
-                  console.error(error);
+                  // Handle notification
+                  _this.notify.error = true;
+                  _this.notify.errorMessage = error.response.data.message;
                 });
 
               case 2:
@@ -38907,6 +38931,40 @@ var render = function() {
           ]),
           _vm._v(" "),
           _c("div", { staticClass: "card-body" }, [
+            _vm.notify.success
+              ? _c(
+                  "div",
+                  {
+                    staticClass: "alert alert-success",
+                    attrs: { role: "alert" }
+                  },
+                  [
+                    _vm._v(
+                      "\n                        " +
+                        _vm._s(_vm.notify.successMessage) +
+                        "\n                    "
+                    )
+                  ]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.notify.error
+              ? _c(
+                  "div",
+                  {
+                    staticClass: "alert alert-danger",
+                    attrs: { role: "alert" }
+                  },
+                  [
+                    _vm._v(
+                      "\n                        " +
+                        _vm._s(_vm.notify.errorMessage) +
+                        "\n                    "
+                    )
+                  ]
+                )
+              : _vm._e(),
+            _vm._v(" "),
             _c(
               "div",
               [
@@ -39060,7 +39118,7 @@ var render = function() {
                             }
                           ],
                           staticClass: "form-control mb-2",
-                          attrs: { type: "text", placeholder: "Unit Price" },
+                          attrs: { type: "number", placeholder: "Unit Price" },
                           domProps: { value: _vm.formData[key].unit_price },
                           on: {
                             input: function($event) {
@@ -39131,25 +39189,27 @@ var render = function() {
                         })
                       ]),
                       _vm._v(" "),
-                      _c("div", { staticClass: "col-1" }, [
-                        _c(
-                          "button",
-                          {
-                            staticClass: "btn btn-primary mb-2 btn-sm",
-                            attrs: { type: "button" },
-                            on: {
-                              click: function($event) {
-                                return _vm.removeRepeater(key)
-                              }
-                            }
-                          },
-                          [
-                            _vm._v(
-                              "\n                                        -\n                                    "
+                      key != 0
+                        ? _c("div", { staticClass: "col-1" }, [
+                            _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-primary mb-2 btn-sm",
+                                attrs: { type: "button" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.removeRepeater(key)
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                        -\n                                    "
+                                )
+                              ]
                             )
-                          ]
-                        )
-                      ])
+                          ])
+                        : _vm._e()
                     ])
                   ])
                 }),
