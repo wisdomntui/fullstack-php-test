@@ -1,6 +1,5 @@
 <?php
 
-use Facade\FlareClient\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/create', function (Request $request) {
-    return response()->json(['success' => true, 'message' => 'Order created successfully!', 'data' => $request->all()]);
-});
+Route::post('/create', 'Api\OrderController@store');

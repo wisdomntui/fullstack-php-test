@@ -16,6 +16,10 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->json('items');
+            $table->foreignId('hmo_id')->constrained()->onDelete('CASCADE')->onUpdate('CASCADE');
+            $table->string('provider_name');
+            $table->string('encounter_date');
+            $table->string('batch_name');
             $table->timestamps();
         });
     }
