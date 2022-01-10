@@ -43,7 +43,7 @@ class OrderController extends Controller
 
             // Send email to HMO
             try {
-                $this->sendMail($hmo->email, ['hmo_name' => $hmo->name, 'batch_name' => $order->batch_name, 'provider_name' => $request->provider_data['provider_name']]);
+                $this->sendMail($hmo->email, ['hmo_name' => $hmo->name, 'batch_name' => $batch->name, 'provider_name' => $request->provider_data['provider_name']]);
             } catch (\Throwable $th) {
                 logger($th);
             }
