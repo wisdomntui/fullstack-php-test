@@ -10,7 +10,7 @@ Same way you would install a typical laravel application.
 
     php artisan migrate
 
-    php artisan db:seed --class=HmoSeeder
+    php artisan db:seed --class=HmoSeeder (Before tests are run)
 
     php artisan serve
 

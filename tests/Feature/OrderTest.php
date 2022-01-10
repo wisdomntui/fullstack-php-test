@@ -86,4 +86,78 @@ class OrderTest extends TestCase
                 "message" => 'Order created successfully!',
             ]);
     }
+
+    /**
+     * Asserts that batches can be created by encounter date
+     *
+     * @return void
+     */
+    public function testItCanCreateBatchByEncounterDate()
+    {
+        $payload = [
+            'order' => [
+                [
+                    "item" => "fkuydgyfid",
+                    "unit_price" => "2",
+                    "qty" => "2",
+                    "sub_total" => 4,
+                ],
+                [
+                    "item" => "ghudhiugi",
+                    "unit_price" => "6",
+                    "qty" => "3",
+                    "sub_total" => 18,
+                ],
+            ],
+            'provider_data' => [
+                "hmo_code" => "HMO-B",
+                "provider_name" => "Ben",
+                "date" => "2021-11-18", // Encounter date
+            ],
+            'total' => 22,
+        ];
+
+        $this->json('post', '/api/create', $payload)
+            ->assertStatus(200);
+
+        $this->get(route('batch', ['HMO-B', 'Ben', '2021-11-08']))
+            ->assertStatus(200);
+    }
+
+    /**
+     * Asserts that batches can be created by sent date
+     *
+     * @return void
+     */
+    public function testItCanCreateBatchBySentDate()
+    {
+        $payload = [
+            'order' => [
+                [
+                    "item" => "fkuydgyfid",
+                    "unit_price" => "2",
+                    "qty" => "2",
+                    "sub_total" => 4,
+                ],
+                [
+                    "item" => "ghudhiugi",
+                    "unit_price" => "6",
+                    "qty" => "3",
+                    "sub_total" => 18,
+                ],
+            ],
+            'provider_data' => [
+                "hmo_code" => "HMO-A",
+                "provider_name" => "Kingsley",
+                "date" => "2021-11-18", // Encounter date
+            ],
+            'total' => 22,
+        ];
+
+        $this->json('post', '/api/create', $payload)
+            ->assertStatus(200);
+
+        $this->get(route('batch', ['HMO-A', 'Kingsley']))
+            ->assertStatus(200);
+    }
 }

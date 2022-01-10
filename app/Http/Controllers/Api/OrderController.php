@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\HmoMail;
+use App\Models\Batch;
 use App\Models\Hmo;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -28,15 +29,17 @@ class OrderController extends Controller
             // Get the hmo
             $hmo = Hmo::where('code', $request->provider_data['hmo_code'])->firstOrFail();
 
+            // Create or get batch if it exists
+            $batch = $this->batch($hmo, $request->provider_data);
+
             // Create new order
             $order = new Order();
             $order->items = json_encode($request->order);
             $order->provider_name = $request->provider_data['provider_name'];
             $order->encounter_date = $request->provider_data['date'];
-            $order->batch_name = $this->batchName($hmo, $request->provider_data);
 
             // Save new order
-            $hmo->orders()->save($order);
+            $batch->orders()->save($order);
 
             // Send email to HMO
             try {
@@ -61,11 +64,10 @@ class OrderController extends Controller
      * @param $hmo
      * @param $provider
      *
-     * @return string $batchName
      */
-    public function batchName($hmo, $provider)
+    public function batch($hmo, $provider)
     {
-        // Determine the batch naming based on the HMO
+        // Determine the batch based on the HMO's preference
         if ($hmo->batch_by_encounter == 1) {
             $encounterDate = Carbon::createFromFormat('Y-m-d', $provider['date']);
             $batchName = $provider['provider_name'] . " " . $encounterDate->format('F') . " " . $encounterDate->format('Y');
@@ -73,7 +75,10 @@ class OrderController extends Controller
             $currentDate = Carbon::now();
             $batchName = $provider['provider_name'] . " " . $currentDate->format('M') . " " . $currentDate->format('Y');
         }
-        return $batchName;
+        return Batch::firstOrCreate(
+            ['name' => $batchName],
+            ['name' => $batchName, 'hmo_id' => $hmo->id]
+        );
     }
 
     /**
@@ -87,5 +92,42 @@ class OrderController extends Controller
     public function sendMail($hmoEmail, $emailData)
     {
         Mail::to($hmoEmail)->send(new HmoMail($emailData));
+    }
+
+    /**
+     * Get batch for HMOs
+     *
+     * @param $hmoCode
+     * @param $dateTime
+     * @param $providerName
+     *
+     * @return $batch
+     */
+    public function getBatch($hmoCode, $providerName, $dateTime = null)
+    {
+        try {
+            // Get the hmo
+            $hmo = Hmo::where('code', $hmoCode)->firstOrFail();
+
+            // Decides if batch is based on encounter date or not
+            if ($hmo->batch_by_encounter == 1 && $dateTime != null) {
+                $encounterDate = Carbon::createFromFormat('Y-m-d', $dateTime);
+                $batchName = $providerName . " " . $encounterDate->format('F') . " " . $encounterDate->format('Y');
+            } else {
+                $currentDate = Carbon::now();
+                $batchName = $providerName . " " . $currentDate->format('M') . " " . $currentDate->format('Y');
+            }
+
+            // Get batch
+            $batch = Batch::where([['name', '=', $batchName], ['hmo_id', '=', $hmo->id]])->firstOrFail();
+
+            return response()->json(['success' => true, 'data' => $batch]);
+        } catch (\Throwable $th) {
+            // Log error to console
+            logger($th);
+
+            // Return appropriate error message to client
+            return response()->json(['success' => false, 'message' => 'Oops! This action cannot be carried out at the moment.'], 500);
+        }
     }
 }

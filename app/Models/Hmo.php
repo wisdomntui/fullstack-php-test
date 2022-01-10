@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Hmo extends Model
 {
-    public function orders()
+    public function batches()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Batch::class);
     }
 }

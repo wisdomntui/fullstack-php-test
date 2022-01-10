@@ -19,3 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/create', 'Api\OrderController@store');
+
+Route::get('/batch/{hmo}/{providerName}/{dateTime?}', 'Api\OrderController@getBatch')->name('batch');

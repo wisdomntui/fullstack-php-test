@@ -16,8 +16,8 @@ class Order extends Model
         'order.*.sub_total' => 'required|numeric',
     ];
 
-    public function hmos()
+    public function batch()
     {
-        return $this->belongsTo(Hmo::class);
+        return $this->belongsTo(Batch::class);
     }
 }
